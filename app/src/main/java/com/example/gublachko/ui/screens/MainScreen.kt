@@ -19,18 +19,23 @@ fun MainScreen() {
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        StatusBar() // <-- Добавляем нашу панель в самом верху
+    val switchPage = {
+        coroutineScope.launch {
+            val nextPage = if (pagerState.currentPage == 0) 1 else 0
+            pagerState.animateScrollToPage(nextPage)
+        }
+    }
 
-        Row(modifier = Modifier.fillMaxSize()) {
-            // Левая панель
-            QuickAppsPanel()
+    Row(modifier = Modifier.fillMaxSize()) {
+        // Левая панель (начинается от самого верха)
+        QuickAppsPanel(onSwitchPage = switchPage)
 
-            // Правая область с возможностью переключения страниц
+        // Правая область: статус-бар + пейджер
+        Column(modifier = Modifier.weight(1f).fillMaxSize()) {
+            StatusBar()
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
-                    .weight(1f)
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         detectTransformGestures { _, pan, _, _ ->
@@ -53,7 +58,5 @@ fun MainScreen() {
                 }
             }
         }
-
-
     }
 }
